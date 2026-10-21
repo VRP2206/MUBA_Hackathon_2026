@@ -10,12 +10,12 @@ Tenners** for the Gonka Router "AI for Society" hackathon track.
 
 ## Live demo
 
-| | |
-|---|---|
-| **Web app** | <https://anxin-protect.com> (custom domain) — also <https://anxin-frontend.onrender.com> |
-| **API health** | <https://anxin-backend.onrender.com/health> → must show `"gonka_mock_mode": false` |
-| **Demo video** | https://youtu.be/xfWZiAKybs8 |
-| **Source** | <https://github.com/VRP2206/MUBA_Hackathon_2026> |
+|                |                                                                                          |
+| -------------- | ---------------------------------------------------------------------------------------- |
+| **Web app**    | <https://anxin-protect.com> (custom domain) — also <https://anxin-frontend.onrender.com> |
+| **API health** | <https://anxin-backend.onrender.com/health> → must show `"gonka_mock_mode": false`       |
+| **Demo video** | <https://youtu.be/xfWZiAKybs8>                                                           |
+| **Source**     | <https://github.com/VRP2206/MUBA_Hackathon_2026>                                         |
 
 Both services run on Render's free tier, which sleeps after ~15 idle minutes;
 the first request afterwards takes 30–60 seconds (measured 32 s on 5 Sep
@@ -26,35 +26,16 @@ image that carries the Tesseract engine (verified 5 Sep 2026).
 
 ### Devfolio submission checklist
 
-| Requirement | Where it is answered |
-|---|---|
-| Project description | Top of this file; [`SOLUTION.md`](SOLUTION.md); [`docs/`](docs/) |
-| Problem statement | [The problem](#the-problem); [`PROBLEM.md`](PROBLEM.md) |
-| Blockchain technology used | [Blockchain technology used](#blockchain-technology-used) |
-| Smart contract addresses (testnet) | [No smart contract](#no-smart-contract) — exact wording for the form is there |
-| Setup and installation | [Start here](#-start-here-where-does-my-api-key-go), [Run it](#run-it-two-terminals), [Quickstart](#quickstart) |
-| Team members | [Team](#team) |
-| Declaration of AI tools used | [`AI_USE_DISCLOSURE.md`](AI_USE_DISCLOSURE.md) |
-| Demonstration video (2–5 min) | [Live demo](#live-demo) table above |
-
-### Gonka track brief — where each item is met
-
-| Gonka asked for | Anxin | Where |
-|---|---|---|
-| All AI reasoning and verification through gonkarouter.io — **mandatory** | Every model call goes through `backend/app/gonka_client.py`, the only module permitted to call a model. No other provider at runtime, ever | [Gonka Router integration](#gonka-router-integration); [`AI_USE_DISCLOSURE.md`](AI_USE_DISCLOSURE.md) |
-| Multi-model consensus, at least two models | `deepseek-ai/DeepSeek-V4-Flash-0731` and `MiniMaxAI/MiniMax-M2.7`, called concurrently on identical evidence, neither shown the other's answer, `X-Gonka-No-Fallback: true`, requested-vs-actual model checked | `backend/app/verifier.py`, `consensus.py`, `tests/test_gonka_client.py` |
-| Claim extraction from a URL, tweet, or text | Text, link, or screenshot (local OCR → editable text). Claims typed factual / opinion / unverifiable and shown in the report | `verifier.extract_claims`; "What we checked" in `ResultsPanel.tsx` |
-| Verification against real-time web data | `evidence.py` fetches the URL and runs a keyless web search, SSRF-guarded; the models reason over fenced evidence and never browse | `backend/app/evidence.py`, `tests/test_evidence_ssrf.py` |
-| Truth Score (0–100) + reasoning trace | Truth Score arc, separate scam-risk band, each model's reasoning in EN and ZH, consensus explanation, warning signs | `TruthScoreGauge.tsx`, `ModelComparison.tsx` |
-| Transparency UI with Gonka Request IDs for each inference step | For both verification calls: Request ID, devshard, requested vs actual model, public receipt link. The claim-extraction call's ID is captured server-side and not yet surfaced | `TransparencyPanel.tsx`; [Verifying it's really Gonka](#verifying-its-really-gonka) |
-| Neutrality prompt; cite evidence | System prompts fence user content as untrusted data and require evidence-based conclusions | `backend/app/prompts.py`, `tests/test_prompt_safety.py` |
-| Consensus logic for disagreement ("a major plus") | ≤ 20 points agree · 21–40 lean, confidence drops · > 40 refuse to average → *insufficient*. Fraud risk escalates, never averages down. Evidence gate caps confidence when no sources were found | `backend/app/consensus.py`, `tests/test_consensus.py` |
-| Live demo URL · documented repository · 2-minute live fact-check video | <https://anxin-protect.com> · this README and `docs/` · [Live demo](#live-demo) | — |
-
-Safety for the people it is built for — details masked before inference,
-nothing stored, never "call the number in the message", colour never the
-only signal — is set out in [`SOLUTION.md`](SOLUTION.md) ("Built for someone
-who is worried") and [Interface rules](#interface-rules).
+| Requirement                        | Where it is answered                                                                                            |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Project description                | Top of this file; [`SOLUTION.md`](SOLUTION.md); [`docs/`](docs/)                                                |
+| Problem statement                  | [The problem](#the-problem); [`PROBLEM.md`](PROBLEM.md)                                                         |
+| Blockchain technology used         | [Blockchain technology used](#blockchain-technology-used)                                                       |
+| Smart contract addresses (testnet) | [No smart contract](#no-smart-contract) — exact wording for the form is there                                   |
+| Setup and installation             | [Start here](#-start-here-where-does-my-api-key-go), [Run it](#run-it-two-terminals), [Quickstart](#quickstart) |
+| Team members                       | [Team](#team)                                                                                                   |
+| Declaration of AI tools used       | [`AI_USE_DISCLOSURE.md`](AI_USE_DISCLOSURE.md)                                                                  |
+| Demonstration video (2–5 min)      | [Live demo](#live-demo) table above                                                                             |
 
 ### Blockchain technology used
 
@@ -65,15 +46,11 @@ claim extraction, both independent verifications, the meme explanation — is
 a Gonka inference call; nothing runs on a centralized model provider, and no
 development-assistant model is part of the running app.
 
-Verifiability comes from Gonka Router's public receipts rather than from a
-contract we deploy: each inference returns a Gonka `X-Request-Id` and the
-devshard that served it, and each request id resolves at GonkaRouter's public,
-unauthenticated receipt endpoint. The report shows these per model call. A
-receipt is **independently verifiable against GonkaRouter — not something we
-could fabricate on our own server**: it attests that this request was served
-by this model, on this Gonka devshard, at this time. It is GonkaRouter's
-attestation, not a third party's, and it does not prove the claim itself is
-true. Anxin issues no token and deploys no smart contract; see
+Verifiability comes from the network rather than from a contract we deploy:
+each inference returns a Gonka `X-Request-Id` and the devshard that served
+it, and each request id resolves at Gonka's public receipt endpoint. The
+report shows these per model call, and the receipt link opens independently
+of our server. Anxin issues no token and deploys no smart contract; see
 [No smart contract](#no-smart-contract).
 
 ---
@@ -96,14 +73,14 @@ only ever read server-side -- it is never sent to the browser.
 
 ### Prerequisites
 
-| Need | Version | Notes |
-|---|---|---|
-| **Python** | CPython **3.11 – 3.13** | From [python.org](https://www.python.org/downloads/), Anaconda, or the Microsoft Store. Tick *"Add python.exe to PATH"* during install. |
-| **Node.js** | 18+ | From [nodejs.org](https://nodejs.org/). |
-| Tesseract OCR | 5.x | **Optional**, screenshot mode only. `winget install -e --id UB-Mannheim.TesseractOCR`, then follow [Screenshot mode (OCR) setup](#screenshot-mode-ocr-setup): the Windows installer does not add itself to PATH and ships English only. Everything else works without it. |
+| Need          | Version                 | Notes                                                                                                                                                                                                                                                                     |
+| ------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Python**    | CPython **3.11 – 3.13** | From [python.org](https://www.python.org/downloads/), Anaconda, or the Microsoft Store. Tick _"Add python.exe to PATH"_ during install.                                                                                                                                   |
+| **Node.js**   | 18+                     | From [nodejs.org](https://nodejs.org/).                                                                                                                                                                                                                                   |
+| Tesseract OCR | 5.x                     | **Optional**, screenshot mode only. `winget install -e --id UB-Mannheim.TesseractOCR`, then follow [Screenshot mode (OCR) setup](#screenshot-mode-ocr-setup): the Windows installer does not add itself to PATH and ships English only. Everything else works without it. |
 
 > **Windows: do not use the MSYS2 / MinGW Python.** If `python3` in Git Bash
-> lives under `C:\msys64\...`, dependency installation *will* fail with
+> lives under `C:\msys64\...`, dependency installation _will_ fail with
 > `Unsupported platform: mingw_x86_64_msvcrt_gnu` and `Rust not found`. PyPI
 > publishes no prebuilt packages for MinGW, so pip tries to compile
 > everything from source — including the Rust-based `pydantic-core` — and
@@ -114,6 +91,7 @@ only ever read server-side -- it is never sent to the browser.
 ### Run it (two terminals)
 
 **Windows -- PowerShell**
+
 ```powershell
 # Terminal 1
 powershell -ExecutionPolicy Bypass -File .\setup-backend.ps1
@@ -122,6 +100,7 @@ powershell -ExecutionPolicy Bypass -File .\setup-frontend.ps1
 ```
 
 **Windows -- Git Bash (and macOS / Linux)**
+
 ```bash
 ./setup.sh backend     # Terminal 1
 ./setup.sh frontend    # Terminal 2
@@ -130,7 +109,7 @@ powershell -ExecutionPolicy Bypass -File .\setup-frontend.ps1
 > **Git Bash gotcha:** do not run the `.ps1` files from Git Bash using a
 > backslash path (`.\setup-backend.ps1`). Bash treats `\` as an escape
 > character and strips it, so PowerShell receives `.setup-backend.ps1` --
-> no path separator -- and reports *"the argument ... does not exist"*.
+> no path separator -- and reports _"the argument ... does not exist"_.
 > Use `./setup.sh backend` instead, or `-File ./setup-backend.ps1` with a
 > forward slash. VS Code's default terminal on Windows is often Git Bash,
 > so this is easy to hit without realising which shell you're in.
@@ -148,13 +127,13 @@ attention. (Prefer to do it by hand? See [Quickstart](#quickstart) below.)
 
 ### If something goes wrong
 
-| Symptom | Cause | Fix |
-|---|---|---|
-| Report shows a yellow "mock data" banner | `GONKA_MOCK_MODE` is still `true`, or `GONKA_API_KEY` is empty | Fix both in `backend/.env`, restart the backend |
-| `503 ... both verifier models were unavailable` | Key rejected, wrong model id, or the network is saturated | Check the backend terminal -- it logs the real reason (401 vs 429 vs timeout) |
-| Backend log says `HTTP 400` / `HTTP 404` for a model | A `GONKA_MODEL_*` id doesn't exist in the catalogue | Run `curl https://api.gonkarouter.io/v1/models -H "Authorization: Bearer $KEY"` and paste the exact id into `.env` |
-| Screenshot tab says *"OCR engine is not installed"* or *"No text could be extracted"* for every image | Tesseract missing or not found. The Windows installer never adds itself to PATH; Render's native Python runtime has no Tesseract at all | Locally: set `TESSERACT_CMD` and `TESSDATA_DIR` in `backend/.env`, see [Screenshot mode (OCR) setup](#screenshot-mode-ocr-setup). On Render: the backend must be serving the Docker image, see [Live deployment](#live-deployment-render). Text and Link modes are unaffected either way |
-| Evidence list is always empty | Outbound web search blocked by your network | Expected on restricted networks; verification still runs, and the report says evidence was unavailable |
+| Symptom                                                                                               | Cause                                                                                                                                   | Fix                                                                                                                                                                                                                                                                                      |
+| ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Report shows a yellow "mock data" banner                                                              | `GONKA_MOCK_MODE` is still `true`, or `GONKA_API_KEY` is empty                                                                          | Fix both in `backend/.env`, restart the backend                                                                                                                                                                                                                                          |
+| `503 ... both verifier models were unavailable`                                                       | Key rejected, wrong model id, or the network is saturated                                                                               | Check the backend terminal -- it logs the real reason (401 vs 429 vs timeout)                                                                                                                                                                                                            |
+| Backend log says `HTTP 400` / `HTTP 404` for a model                                                  | A `GONKA_MODEL_*` id doesn't exist in the catalogue                                                                                     | Run `curl https://api.gonkarouter.io/v1/models -H "Authorization: Bearer $KEY"` and paste the exact id into `.env`                                                                                                                                                                       |
+| Screenshot tab says _"OCR engine is not installed"_ or _"No text could be extracted"_ for every image | Tesseract missing or not found. The Windows installer never adds itself to PATH; Render's native Python runtime has no Tesseract at all | Locally: set `TESSERACT_CMD` and `TESSDATA_DIR` in `backend/.env`, see [Screenshot mode (OCR) setup](#screenshot-mode-ocr-setup). On Render: the backend must be serving the Docker image, see [Live deployment](#live-deployment-render). Text and Link modes are unaffected either way |
+| Evidence list is always empty                                                                         | Outbound web search blocked by your network                                                                                             | Expected on restricted networks; verification still runs, and the report says evidence was unavailable                                                                                                                                                                                   |
 
 ---
 
@@ -220,7 +199,7 @@ Design principles carried through the whole codebase:
   evidence (`asyncio.gather`).
 - **Honest uncertainty beats false precision.** When the two models
   disagree by more than the documented threshold, the result is reported as
-  *Unable to verify* with reduced confidence -- never averaged into a
+  _Unable to verify_ with reduced confidence -- never averaged into a
   falsely precise number. See `backend/app/consensus.py`.
 - **No raw stack trace, ever, reaches a user.** Every router catches its
   domain errors; a global handler catches everything else.
@@ -232,7 +211,7 @@ worried when they arrive. Three rules follow from that, and the code holds
 to them:
 
 - **No status is carried by colour alone.** Every risk, verdict and error
-  state pairs a colour with an icon *and* a text label. The icons are
+  state pairs a colour with an icon _and_ a text label. The icons are
   original inline SVG (`components/Icon.tsx`) rather than text glyphs like
   `✓` / `⚠`, because those are CJK-ambiguous codepoints — with a Chinese
   font active the browser often substitutes a full-width or emoji variant,
@@ -289,8 +268,8 @@ How the app behaves: it asks Tesseract which language packs exist and reads
 `eng+chi_sim` when `chi_sim` is present, English only when it is not
 (Tesseract 5 silently drops a missing language and exits 0, so this is
 checked up front rather than caught). If the engine is missing entirely,
-`/api/ocr` still returns `200` with an explicit *"OCR engine is not
-installed"* warning and an empty, editable text box — never a fake "no text
+`/api/ocr` still returns `200` with an explicit _"OCR engine is not
+installed"_ warning and an empty, editable text box — never a fake "no text
 found".
 
 Dependencies are split so that running the app never requires a build
@@ -302,7 +281,7 @@ To run the test suite (no live Gonka key or network access required -- see
 
 ```bash
 pip install "pytest>=8.3,<9" "pytest-asyncio>=0.24,<1.0" "respx>=0.21,<1.0"
-pytest -q          # 165 tests
+pytest -q          # 159 tests
 ```
 
 > **Known issue:** `pip install -r requirements-dev.txt` currently fails
@@ -349,7 +328,7 @@ it is never called from the browser (the API key lives server-side only, see
   configuration rather than constants, because provider catalogues shift
   during an event -- re-verify with `./check-gonka.sh` before each demo.
 - **Tolerant of real model output.** Reasoning models wrap answers in
-  ```` ```json ```` fences and `<think>` blocks, improvise enum labels
+  ` ```json ` fences and `<think>` blocks, improvise enum labels
   ("TRUE", "high risk"), and occasionally score 0-1 instead of 0-100.
   `app/json_utils.py` and the normalizers in `app/verifier.py` absorb all of
   that, so one sloppy label never costs us an entire second opinion --
@@ -370,13 +349,13 @@ it is never called from the browser (the API key lives server-side only, see
   retries, then an honest failure the consensus layer can reason about.
 
 - **Single-model results are never dressed up as consensus.** Gonka
-  confirmed on 2 September 2026 that DeepSeek-V4-Flash is *sustainedly
-  saturated*, and that their default failover re-routes the overflow to
+  confirmed on 2 September 2026 that DeepSeek-V4-Flash is _sustainedly
+  saturated_, and that their default failover re-routes the overflow to
   MiniMax-M2.7 -- precisely the substitution that would turn our two
   "independent" opinions into the same model twice. `X-Gonka-No-Fallback`
   prevents that, which means we deliberately opt into real 429s on the
   DeepSeek leg instead. When that happens the report degrades: the verdict
-  drops to *insufficient* (unless the surviving model raised a scam
+  drops to _insufficient_ (unless the surviving model raised a scam
   warning, which is never muted), confidence is capped at 60, a
   "Not cross-verified" badge appears, and the model panel says plainly that
   cross-verification did not occur. See
@@ -411,10 +390,10 @@ video, or opened during judging will still resolve later.
 **What it does NOT prove:** that the claim is true or false, or the content
 of the prompt and response. And note the precise limit, confirmed by Gonka
 on 2 September 2026: the receipt is served from **GonkaRouter's** database,
-so a reader still trusts *their* server rather than nobody's. It is Gonka's
+so a reader still trusts _their_ server rather than nobody's. It is Gonka's
 attestation, not an independent one. The defensible phrasing -- and the one
-used in the UI -- is *"independently verifiable against GonkaRouter, not
-something we could fabricate on our own server."* Gateway-signed content
+used in the UI -- is _"independently verifiable against GonkaRouter, not
+something we could fabricate on our own server."_ Gateway-signed content
 hashes do not exist yet, so no cryptographic proof of content is claimed
 anywhere.
 
@@ -450,10 +429,10 @@ real result during rehearsal.
 [`render.yaml`](render.yaml) is a Render Blueprint defining two free-tier web
 services, deployed from this repository's `main` branch:
 
-| Service | URL | Runtime | Root |
-|---|---|---|---|
-| `anxin-backend` | <https://anxin-backend.onrender.com> | Docker (`python:3.12-slim` + Tesseract) | `backend/` |
-| `anxin-frontend` | <https://anxin-frontend.onrender.com> | Node | `frontend/` |
+| Service          | URL                                   | Runtime                                 | Root        |
+| ---------------- | ------------------------------------- | --------------------------------------- | ----------- |
+| `anxin-backend`  | <https://anxin-backend.onrender.com>  | Docker (`python:3.12-slim` + Tesseract) | `backend/`  |
+| `anxin-frontend` | <https://anxin-frontend.onrender.com> | Node                                    | `frontend/` |
 
 They are wired to each other by name: the frontend is built with
 `NEXT_PUBLIC_API_BASE_URL=https://anxin-backend.onrender.com`, and the
@@ -477,7 +456,7 @@ you cannot control on stage.
 
 **Screenshot mode in production runs from a Docker image.** Render's native
 Python runtime has no `apt`, so it can never carry the Tesseract OCR engine,
-and `/api/ocr` there answers *"OCR engine is not installed"* for every image.
+and `/api/ocr` there answers _"OCR engine is not installed"_ for every image.
 The backend service therefore builds from
 [`backend/Dockerfile`](backend/Dockerfile) (`python:3.12-slim` + Tesseract +
 the `chi_sim` pack), with `healthCheckPath: /health` so Render only routes
@@ -495,8 +474,8 @@ frontend is built against stays `https://anxin-backend.onrender.com`. Re-enter
 and is not carried over. Expect the first Docker build to take 3–5 minutes.
 
 **Verify OCR is live:** open the web app, Screenshot tab, upload any image
-with text. Extracted text means the Docker deploy is serving; *"OCR engine is
-not installed"* means the previous native deploy still is.
+with text. Extracted text means the Docker deploy is serving; _"OCR engine is
+not installed"_ means the previous native deploy still is.
 
 ## Live Gonka check
 
@@ -529,12 +508,12 @@ scanner comparing dependency versions against a CVE database returns the same
 answer every time and can be re-run by a judge; asking a language model "is
 this secure?" produces something unverifiable that will miss things.
 
-| Layer | Tool | Catches |
-|---|---|---|
-| Secrets | `git log -p` + built-bundle grep | Keys committed to history, or shipped to the browser |
-| Dependencies | `pip-audit`, `npm audit` | Known CVEs in libraries you depend on |
-| Code patterns | `bandit` | Insecure constructs in our own Python |
-| Behaviour | `pytest` | SSRF blocking, prompt-injection fencing, redaction, upload limits |
+| Layer         | Tool                             | Catches                                                           |
+| ------------- | -------------------------------- | ----------------------------------------------------------------- |
+| Secrets       | `git log -p` + built-bundle grep | Keys committed to history, or shipped to the browser              |
+| Dependencies  | `pip-audit`, `npm audit`         | Known CVEs in libraries you depend on                             |
+| Code patterns | `bandit`                         | Insecure constructs in our own Python                             |
+| Behaviour     | `pytest`                         | SSRF blocking, prompt-injection fencing, redaction, upload limits |
 
 Antivirus scanners (VirusTotal and similar) are **not** part of this and would
 be misleading if they were: they match known malware signatures. Nothing here
@@ -563,8 +542,9 @@ backlog): the FastAPI backend, the Gonka Router integration, the
 consensus/evidence pipeline, local OCR + meme mode, the bilingual Next.js
 frontend, the automated test suite, and the Render deployment described in
 [Live deployment (Render)](#live-deployment-render). It does **not** include
-the recorded demo video, the pitch deck, rehearsals, or the Devfolio
-submission itself -- those are the team's remaining Epic 7/8 tasks. Also out
+the pitch deck, rehearsals, or the Devfolio submission itself -- those are
+the team's remaining Epic 7/8 tasks. The recorded demo video is hosted on
+YouTube rather than in the repo; it is linked in [Live demo](#live-demo). Also out
 of scope by deliberate P0-first scope discipline (Table 9): CI workflow
 wiring, a vendored shadcn/ui component set (`UI-10`, P1 -- see
 `THIRD_PARTY_NOTICES.md`), and the optional deferred-hedge latency
@@ -582,27 +562,27 @@ optimization (`GON-08`, P2).
 
 ## Team
 
-| Code | Role | Name | GitHub |
-|---|---|---|---|
-| LEAD | Product & integration lead | Rahul Pemsing | `rpem0003` |
-| BE | Backend & Gonka lead | Rahul Pemsing | `rpem0003` | 
-| TE | Testing Lead | Huan Ee chew | `AdamChew27` |
-| FE | Frontend & UX lead | Syed Ibrahim Hassan | `ihas0013-hue` & `sih2006` | 
-| QA/DOCS | Quality, documentation & pitch lead | Lip khoo | `lkho0014-arch`|
+| Code    | Role                                |
+| ------- | ----------------------------------- |
+| LEAD    | Product & integration lead          |
+| BE      | Backend & Gonka lead                |
+| FE      | Frontend & UX lead                  |
+| QA/DOCS | Quality, documentation & pitch lead |
 
 Who committed what, from the git log (merge commits excluded):
 
-| Committer | Contribution |
-|---|---|
-| `rpem0003` | Backend application: FastAPI app, schemas, Gonka client, evidence service, verification and consensus pipeline, meme mode, routers, dependencies, Render Blueprint, setup and check scripts. `docs/BACKEND.md`, `docs/FRONTEND.md`. Initial README. |
-| `eche0118` | The 165-test backend suite: consensus bands, Gonka client retries/fallback/auth, SSRF, prompt-injection fencing, PII redaction, JSON hardening, OCR validation, schema rules, meme no-verdict guarantee, mocked end-to-end runs. |
-| `Lip Hong` | User-flow, internal-process and class diagrams (`docs/UserFlow.md`, `docs/InternalProcess.md`, `docs/UML Class Diagram.md`). |
-| `sih2006` / `ihas0013-hue` (one person) | Frontend and its redesign, EN/ZH dictionaries, `PROBLEM.md`, `SOLUTION.md`, the OCR engine fix and `backend/Dockerfile`, AI-use disclosure, third-party notices. |
+| Committer                               | Contribution                                                                                                                                                                                                                                        |
+| --------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rpem0003`                              | Backend application: FastAPI app, schemas, Gonka client, evidence service, verification and consensus pipeline, meme mode, routers, dependencies, Render Blueprint, setup and check scripts. `docs/BACKEND.md`, `docs/FRONTEND.md`. Initial README. |
+| `eche0118`                              | The 159-test backend suite: consensus bands, Gonka client retries/fallback/auth, SSRF, prompt-injection fencing, PII redaction, JSON hardening, OCR validation, schema rules, meme no-verdict guarantee, mocked end-to-end runs.                    |
+| `Lip Hong`                              | User-flow, internal-process and class diagrams (`docs/UserFlow.md`, `docs/InternalProcess.md`, `docs/UML Class Diagram.md`).                                                                                                                        |
+| `sih2006` / `ihas0013-hue` (one person) | Frontend and its redesign, EN/ZH dictionaries, `PROBLEM.md`, `SOLUTION.md`, the OCR engine fix and `backend/Dockerfile`, AI-use disclosure, third-party notices.                                                                                    |
 
-Commit author names differ from GitHub handles for two members, so the
-tables above reconcile as: `eche0118` (commits) is Huan Ee Chew
-(`AdamChew27`); `Lip Hong` (commits) is `lkho0014-arch`; `rpem0003` and
-`sih2006` / `ihas0013-hue` are the same in both.
+Work that does not show up in the git log:
+
+| Contributor | Contribution                                                                           |
+| ----------- | -------------------------------------------------------------------------------------- |
+| `lhkhoo14`  | Demo video: wrote the script and produced the recording (see [Live demo](#live-demo)). |
 
 How AI coding assistance was used, and which members have confirmed their
 own use, is in [`AI_USE_DISCLOSURE.md`](AI_USE_DISCLOSURE.md). See
