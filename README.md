@@ -208,7 +208,7 @@ Design principles carried through the whole codebase:
 
 The people this is for are often older, sometimes colour-blind, and always
 worried when they arrive. Three rules follow from that, and the code holds
-to them:
+to them:  
 
 - **No status is carried by colour alone.** Every risk, verdict and error
   state pairs a colour with an icon _and_ a text label. The icons are
